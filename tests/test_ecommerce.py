@@ -11,31 +11,23 @@ def setup_page(page: Page):
     expect(page).to_have_title(re.compile(
         "Practice Software Testing", re.IGNORECASE))
 
-
-# ============================================================
 # Task 1: Home Page Validation
-# ============================================================
 def test_task_1_home_page_validation(page: Page):
     # 1. Verify navigation bar is visible
     nav_bar = page.get_by_role("navigation")
     expect(nav_bar).to_be_visible()
 
-    # 2. Verify products are displayed
     product_cards = page.locator("a.card")
     expect(product_cards.first).to_be_visible(timeout=10000)
     assert product_cards.count() > 0
 
-    # 3. Verify at least one product can be selected/clicked
     first_product_title = product_cards.first.locator(
         '[data-test="product-name"]').inner_text()
     product_cards.first.click()
     expect(page.locator('[data-test="product-name"]')
            ).to_have_text(first_product_title)
 
-
-# # ============================================================
 # # Task 2: Product Search
-# # ============================================================
 # def test_task_2_product_search_valid(page: Page):
 #     search_term = "Pliers"
 

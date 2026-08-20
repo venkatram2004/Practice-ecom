@@ -1,0 +1,42 @@
+from playwright.sync_api import expect, sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=False)
+    page = browser.new_page()
+    page.goto("https://practicesoftwaretesting.com/")
+    page.wait_for_timeout(3000)
+
+    # Select a product
+    page.locator('img[alt="Combination Pliers"]').click()
+    page.wait_for_timeout(3000)
+
+    # Verify Product Name
+    p_name = page.locator('h1[data-test="product-name"]')
+    expect(p_name).to_be_visible()
+    print("Product Name:", p_name.text_content())
+
+    # Verify Product Price
+    p_price = page.locator('span[aria-label="unit-price"]')
+    expect(p_price).to_be_visible()
+    print("Product Price:", p_price.text_content())
+
+    # Verify Product Image
+    p_img = page.locator('img.figure-img')
+    expect(p_img).to_be_visible()
+    print("Product Image is displayed")
+
+    # Verify Product Description
+    p_description = page.locator('p[id="description"]')
+    expect(p_description).to_be_visible()
+    print("Product Description:", p_description.text_content())
+
+    # Add to Cart and verify
+    page.locator('button[data-test="add-to-cart"]').click()
+    page.wait_for_timeout(2000)
+
+    cart_badge = page.locator('[data-test="cart-quantity"]')
+    expect(cart_badge).to_have_text("1")
+    print("Cart quantity updated to:", cart_badge.text_content())
+
+    page.wait_for_timeout(5000)
+    browser.close()

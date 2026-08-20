@@ -1,0 +1,41 @@
+from playwright.sync_api import expect, sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=False)
+    page = browser.new_page()
+    page.goto("https://practicesoftwaretesting.com/")
+    page.wait_for_timeout(3000)
+
+    # 1. Add product to cart
+    page.locator('img[alt="Combination Pliers"]').click()
+    page.wait_for_timeout(3000)
+    page.locator('button[data-test="add-to-cart"]').click()
+    page.wait_for_timeout(2000)
+
+    # 2. Open cart
+    page.locator('[data-test="nav-cart"]').click()
+    page.wait_for_timeout(3000)
+
+    # 3. Verify product, quantity, and price in cart
+    product_title = page.locator('.product-title')
+    expect(product_title).to_be_visible()
+    print("Cart Product:", product_title.text_content())
+
+    quantity = page.locator('input[data-test="product-quantity"]')
+    expect(quantity).to_have_value("1")
+    print("Quantity in Cart:", quantity.input_value())
+
+    price = page.locator('[data-test="product-price"]')
+    expect(price).to_be_visible()
+    print("Price in Cart:", price.text_content())
+
+    # 4. Remove product and verify empty cart
+    page.locator('a[class="btn btn-danger"]').click()
+    page.wait_for_timeout(2000)
+
+    empty_cart_msg = page.locator('text="The cart is empty. Nothing to display."')
+    expect(empty_cart_msg).to_be_visible()
+    print("Product removed and cart is empty")
+
+    page.wait_for_timeout(5000)
+    browser.close()

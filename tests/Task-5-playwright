@@ -1,0 +1,52 @@
+from playwright.sync_api import expect, sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=False)
+    page = browser.new_page()
+
+    # Helper function to open login page
+    def go_to_login():
+        page.goto("https://practicesoftwaretesting.com/auth/login")
+        page.wait_for_timeout(2000)
+
+    # Scenario 1: Valid Credentials
+    go_to_login()
+    page.locator('input[data-test="email"]').fill("customer@practicesoftwaretesting.com")
+    page.locator('input[data-test="password"]').fill("welcome01")
+    page.locator('input[data-test="login-submit"]').click()
+    page.wait_for_timeout(3000)
+    expect(page.locator('[data-test="page-title"]')).to_have_text("My account")
+    print("Scenario 1: Valid Login Succeeded")
+
+    # Scenario 2: Invalid Password
+    go_to_login()
+    page.locator('input[data-test="email"]').fill("customer@practicesoftwaretesting.com")
+    page.locator('input[data-test="password"]').fill("wrongpassword123")
+    page.locator('input[data-test="login-submit"]').click()
+    page.wait_for_timeout(2000)
+    error_box = page.locator('[data-test="login-error"]')
+    expect(error_box).to_be_visible()
+    print("Scenario 2: Invalid password error displayed:", error_box.text_content())
+
+    # Scenario 3: Invalid Email
+    go_to_login()
+    page.locator('input[data-test="email"]').fill("notregistered@example.com")
+    page.locator('input[data-test="password"]').fill("welcome01")
+    page.locator('input[data-test="login-submit"]').click()
+    page.wait_for_timeout(2000)
+    error_box = page.locator('[data-test="login-error"]')
+    expect(error_box).to_be_visible()
+    print("Scenario 3: Invalid email error displayed:", error_box.text_content())
+
+    # Scenario 4: Empty Credentials
+    go_to_login()
+    page.locator('input[data-test="login-submit"]').click()
+    page.wait_for_timeout(2000)
+    email_err = page.locator('[data-test="email-error"]')
+    password_err = page.locator('[data-test="password-error"]')
+    expect(email_err).to_be_visible()
+    expect(password_err).to_be_visible()
+    print("Scenario 4: Validation errors displayed:", email_err.text_content(), "|", password_err.text_content())
+
+    page.wait_for_timeout(3000)
+    browser.close()

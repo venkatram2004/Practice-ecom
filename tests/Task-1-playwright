@@ -1,0 +1,32 @@
+from playwright.sync_api import expect, sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=False)
+    page = browser.new_page()
+    page.goto("https://practicesoftwaretesting.com/")
+    page.wait_for_timeout(3000)
+
+    # 1. Verify Page Title
+    print("Page Title:", page.title())
+    expect(page).to_have_title("Practice Software Testing - Toolshop")
+
+    # 2. Verify Navigation is visible
+    nav = page.locator('a[href="/contact"]')
+    expect(nav).to_be_visible()
+    print("Nav item visible:", nav.text_content())
+    page.wait_for_timeout(3000)
+
+    # 3. Verify Products are displayed
+    product_img = page.locator('img[alt="Combination Pliers"]')
+    expect(product_img).to_be_visible()
+    print("Product is visible")
+    page.wait_for_timeout(3000)
+
+    # 4. Verify Product can be selected
+    product_img.click()
+    p_name = page.locator('h1[data-test="product-name"]')
+    expect(p_name).to_be_visible()
+    print("Selected Product Name:", p_name.text_content())
+
+    page.wait_for_timeout(5000)
+    browser.close()

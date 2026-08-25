@@ -1,0 +1,31 @@
+from playwright.sync_api import expect, sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=False)
+    page = browser.new_page()
+    page.goto("https://practicesoftwaretesting.com/")
+
+    all_collected_products = []
+    page_counts = {}
+    current_page_num = 1
+
+    while True:
+        product_title_locators = page.locator('h5[data-test="product-name"]')
+        expect(product_title_locators.first).to_be_visible(timeout=10000)
+
+        current_page_products = [
+            name.strip()
+            for name in product_title_locators.all_text_contents()
+            if name.strip()
+        ]
+        page_counts[current_page_num] = len(current_page_products)
+        all_collected_products.extend(current_page_products)
+
+        next_button = page.locator('a[aria-label="Next"]')
+        next_parent_li = page.locator('li:has(a[aria-label="Next"])')
+
+
+        previous_first_product = current_page_products[0]
+        next_button.click()
+        current_page_num += 1
+

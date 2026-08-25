@@ -1,0 +1,97 @@
+import re
+from playwright.sync_api import expect, sync_playwright
+
+SEARCH_PRODUCTS = ["Pliers", "Hammer", "Screwdriver"]
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=False)
+    page = browser.new_page()
+
+    for search_term in SEARCH_PRODUCTS:
+        print(f"StarJourney for: '{search_term}'")
+
+        page.goto("https://practicesoftwaretesting.com/")
+
+        # 2Search for a product
+        search_bx = page.locator('input[id = "search-query"]')
+        expect(search_bx).to_be_visible()
+        search_bx.fill(search_term)
+        page.locator('button[data-test="search-submit"]').click()
+
+        # 3Select first matching product
+        first_product_card = page.locator("a.card").first
+        expect(first_product_card).to_be_visible()
+        first_product_card.click()
+
+        # 4Capture Product Name and Product Price
+        name_locator = page.locator('h1[data-test="product-name"]')
+        expect(name_locator).to_be_visible()
+        product_name = name_locator.text_content().strip()
+
+        price_locator = page.locator('span[aria-label="unit-price"]')
+        expect(price_locator).to_be_visible()
+        raw_price_str = price_locator.text_content().strip()
+
+        # Extract clean float formatted string....
+        unit_pr = float(raw_price_str.replace("$", ""))
+        formatted_unit_price = f"${unit_pr:.2f}"
+        print(f"Captured: '{product_name}' @ {formatted_unit_price}")
+
+        # 5Add to the Cart
+        add_bn = page.locator('button[data-test="add-to-cart"]')
+        expect(add_bn).to_be_visible()
+        add_bn.click()
+
+        # Wait for cart badge update
+        cart_badge = page.locator('[data-test="cart-quantity"]')
+        # expect(cart_badge).to_have_text(re.compile(r"[1-9]\d*"))
+        expect(cart_badge).to_have_text("1")
+
+        # 6. Navigate to Cart
+        page.locator('[data-test="nav-cart"]').click()
+
+        # 7. Verify correct product name is present
+        cart_item_first = page.locator('[data-test="product-title"]').first
+        expect(cart_item_first).to_be_visible()
+        expect(cart_item_first).to_have_text(product_name)
+
+        # 8. Verify price in cart matches product-page price (checked against '$XX.XX')
+        cart_unit_price = page.locator('[data-test="product-price"]').first
+        expect(cart_unit_price).to_be_visible()
+        expect(cart_unit_price).to_have_text(formatted_unit_price)
+
+        # 9. Increase quantity to 2
+        quantity_inp = page.locator(
+            'input[data-test="product-quantity"]').first
+        expect(quantity_inp).to_be_visible()
+        quantity_inp.fill("2")
+        quantity_inp.press("Enter")
+
+        # 10. Verify dynamically calculated total (Unit Price * 2)
+        expected_total = unit_pr * 2 # 14.86 * 2 = 29.6787
+        expected_total_str = f"${expected_total:.2f}"
+        print(
+            f"Dynamic expected total: 2 x ${unit_pr:.2f} = {expected_total_str}")
+
+        cart_line_total = page.locator('[data-test="line-price"]').first
+        expect(cart_line_total).to_have_text(expected_total_str)
+
+        cart_grand_total = page.locator('[data-test="cart-total"]')
+        expect(cart_grand_total).to_have_text(expected_total_str)
+        print("Verified: Cart totals calculated")
+
+        # 11 Remove product from cart
+        delete_btn = page.locator('a[class="btn btn-danger"]').first
+        expect(delete_btn).to_be_visible()
+        delete_btn.click()
+
+        # 12Verify cart is empty
+        empty_cart_msg = page.locator(
+            'text="The cart is empty. Nothing to display."')
+        expect(empty_cart_msg).to_be_visible()
+        print(f"Verified: Cart is empty for '{search_term}'")
+
+    browser.close()
+    print("\nAll 3 products tested successfully!")
+
+

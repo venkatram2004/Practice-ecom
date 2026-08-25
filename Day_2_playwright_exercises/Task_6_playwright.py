@@ -38,24 +38,3 @@ with sync_playwright() as p:
 
 
 
-from playwright.sync_api import expect, sync_playwright
-
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=False)
-    page = browser.new_page()
-    page.goto("https://practicesoftwaretesting.com/")
-    page.wait_for_timeout(3000)
-
-    # 1. Click a product
-    page.locator('img[alt="Combination Pliers"]').click()
-    page.wait_for_timeout(3000)
-
-    # 2. Product Name verify and capture
-    p_name = page.locator('h1[data-test="product-name"]')
-    expect(p_name).to_be_visible()
-    name_text = p_name.text_content()
-    print("Product Name:", name_text)
-
-    # 4. Product Image verify
-    expect(page.locator("img.figure-img")).to_be_visible()
-    print("Product image is visible")

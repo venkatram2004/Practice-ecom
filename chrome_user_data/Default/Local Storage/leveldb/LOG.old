@@ -1,0 +1,6 @@
+2026/09/01-11:46:29.920 3ee0 Reusing MANIFEST R:\backend-capstone-project\Practice_ecom\chrome_user_data\Default\Local Storage\leveldb/MANIFEST-000001
+2026/09/01-11:46:29.932 3ee0 Recovering log #7
+2026/09/01-11:46:29.936 3ee0 Reusing old log R:\backend-capstone-project\Practice_ecom\chrome_user_data\Default\Local Storage\leveldb/000007.log 
+2026/09/01-11:46:53.392 5908 Level-0 table #11: started
+2026/09/01-11:46:53.398 5908 Level-0 table #11: 16205 bytes OK
+2026/09/01-11:46:53.402 5908 Delete type=0 #7

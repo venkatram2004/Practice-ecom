@@ -19,9 +19,7 @@ def test_strict_mode_and_locator_precision(page: Page):
     with pytest.raises(Exception) as exc_info:
         ambiguous_button.click()
 
-    print("\n--- Playwright Strict Mode Violation Output ---")
     print(str(exc_info.value))
-    print("------------------------------------------------\n")
     assert "strict mode violation" in str(exc_info.value)
 
     target_product_name = "Sauce Labs Backpack"

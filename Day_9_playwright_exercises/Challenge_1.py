@@ -1,12 +1,9 @@
 import pytest
 from playwright.sync_api import Page, expect
-
+from user_login import user_auth
 
 def test_strict_mode_and_locator_precision(page: Page):
-    page.goto("https://www.saucedemo.com")
-    page.locator("#user-name").fill("standard_user")
-    page.locator("#password").fill("secret_sauce")
-    page.locator("#login-button").click()
+    user_auth(page)
 
     expect(page).to_have_url("https://www.saucedemo.com/inventory.html")
 

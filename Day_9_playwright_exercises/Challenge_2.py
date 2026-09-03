@@ -1,14 +1,13 @@
 import pytest
 from playwright.sync_api import Page, expect
+from user_login import user_auth
 
 BASE_URL = "https://www.saucedemo.com"
 
 
 def test_dom_relationships_and_relative_locators(page: Page):
-    page.goto(BASE_URL)
-    page.locator("#user-name").fill("standard_user")
-    page.locator("#password").fill("secret_sauce")
-    page.locator("#login-button").click()
+    user_auth(page)
+
     expect(page).to_have_url(f"{BASE_URL}/inventory.html")
 
     target_name = "Sauce Labs Backpack"
@@ -58,10 +57,7 @@ def test_dom_relationships_and_relative_locators(page: Page):
     ],
 )
 def test_relative_product_card_addition_parameterized(page: Page, product_name: str):
-    page.goto(BASE_URL)
-    page.locator("#user-name").fill("standard_user")
-    page.locator("#password").fill("secret_sauce")
-    page.locator("#login-button").click()
+    user_auth(page)
 
     card = page.locator(".inventory_item").filter(
         has=page.locator(".inventory_item_name", has_text=product_name)

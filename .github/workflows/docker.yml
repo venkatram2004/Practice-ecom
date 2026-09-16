@@ -61,8 +61,8 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           docker build \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/playwright-tests:latest \
+            -t ${{ secrets.DOCKER_USERNAME }}/playwright-tests:latest \
             -f Day_1_playwright_exercises/Day-1-python-task/my-playwright-folder/Dockerfile \
             Day_1_playwright_exercises/Day-1-python-task/my-playwright-folder/
 
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/playwright-tests:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/playwright-tests:latest

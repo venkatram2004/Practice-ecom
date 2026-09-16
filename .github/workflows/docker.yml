@@ -39,7 +39,7 @@ jobs:
 
       - name: Run Pytest
         run: |
-          pytest test_playwright.py -v -o addopts=""
+          pytest test_playwright.py -v -o addopts="" --tb=short
           
   # JOB 2: Build & Push Docker Image (Executes ONLY if tests pass)
   docker-build:

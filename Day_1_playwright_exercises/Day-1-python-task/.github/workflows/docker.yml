@@ -32,10 +32,9 @@ jobs:
           pip install -r my-playwright-folder/requirements.txt
           playwright install --with-deps chromium
 
-      - name: Run Tests
-        working-directory: mypython
+      - name: Run Pytest
         run: |
-          pytest -v
+          pytest -v --headless
 
   docker-build:
     name: Build & Push Docker Image

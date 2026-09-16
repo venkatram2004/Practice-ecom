@@ -1,0 +1,68 @@
+name: Test and Build Docker Image
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Day_1_playwright_exercises/Day-1-python-task/my-playwright-folder/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Day_1_playwright_exercises/Day-1-python-task/my-playwright-folder/**'
+  workflow_dispatch:
+
+jobs:
+  # JOB 1: Run Playwright Python Tests
+  run-tests:
+    name: Run Playwright Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Day_1_playwright_exercises/Day-1-python-task/my-playwright-folder
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: Day_1_playwright_exercises/Day-1-python-task/my-playwright-folder/requirements.txt
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Run Pytest
+        run: |
+          pytest -v
+
+  # JOB 2: Build & Push Docker Image (Executes ONLY if tests pass)
+  docker-build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [ run-tests ]
+    if: github.ref == 'refs/heads/main' && success()
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/playwright-tests:latest \
+            -f Day_1_playwright_exercises/Day-1-python-task/my-playwright-folder/Dockerfile \
+            Day_1_playwright_exercises/Day-1-python-task/my-playwright-folder/
+
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/playwright-tests:latest

@@ -59,7 +59,7 @@ def test_add_tool_to_cart(page: Page):
     expect(cart_counter).to_have_text("2")
 
 def test_invalid_login_validation(page: Page):
-    """Validate error toast on entering invalid credentials."""
+    
     page.goto(f"{BASE_URL}/auth/login")
 
     # Enter wrong user details

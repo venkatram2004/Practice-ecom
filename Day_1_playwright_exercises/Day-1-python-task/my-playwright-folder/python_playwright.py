@@ -32,7 +32,6 @@ def test_search_and_filter_product(page: Page):
     expect(product_titles.first).to_contain_text("Pliers")
 
 def test_add_tool_to_cart(page: Page):
-    """Open product details, select quantity, and add to cart."""
     page.goto(BASE_URL)
 
     # Click first available product card

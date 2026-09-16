@@ -1,50 +1,58 @@
-import re
+import pytest
 from playwright.sync_api import Page, expect
 
-BASE_URL = "https://practicesoftwaretesting.com"
+BASE_URL = "https://www.saucedemo.com"
 
-# Set global timeout for elements to 10 seconds in CI
+# 1. Verify Homepage Title and Brand Logo
 def test_homepage_title_and_banner(page: Page):
-    page.goto(BASE_URL, wait_until="networkidle", timeout=60000)
-    expect(page).to_have_title(re.compile("Practice Software Testing", re.IGNORECASE))
-    expect(page.locator("a.navbar-brand")).to_be_visible()
+    page.goto(BASE_URL, wait_until="domcontentloaded", timeout=30000)
+    expect(page).to_have_title("Swag Labs")
+    expect(page.locator(".login_logo")).to_be_visible()
 
+# 2. Verify Login and Product Catalog
 def test_search_and_filter_product(page: Page):
-    page.goto(BASE_URL, wait_until="networkidle", timeout=60000)
+    page.goto(BASE_URL, wait_until="domcontentloaded", timeout=30000)
     
-    search_input = page.locator("[data-test='search-query']")
-    search_button = page.locator("[data-test='search-submit']")
+    # Login as standard user
+    page.locator("[data-test='username']").fill("standard_user")
+    page.locator("[data-test='password']").fill("secret_sauce")
+    page.locator("[data-test='login-button']").click()
+    
+    # Filter / sort products (low to high)
+    sort_dropdown = page.locator("[data-test='product-sort-container']")
+    expect(sort_dropdown).to_be_visible(timeout=10000)
+    sort_dropdown.select_option("lohi")
+    
+    # Verify products list is rendered
+    items = page.locator(".inventory_item")
+    expect(items).to_have_count(6)
 
-    expect(search_input).to_be_visible()
-    search_input.fill("Pliers")
-    search_button.click()
-
-    # Wait for filtered cards to reload
-    page.wait_for_timeout(2000)
-    product_cards = page.locator(".card")
-    expect(product_cards.first).to_be_visible(timeout=10000)
-
+# 3. Add Item to Cart and Check Cart Badge
 def test_add_tool_to_cart(page: Page):
-    page.goto(BASE_URL, wait_until="networkidle", timeout=60000)
+    page.goto(BASE_URL, wait_until="domcontentloaded", timeout=30000)
     
-    # Wait for products to show up and click
-    first_product = page.locator(".card").first
-    expect(first_product).to_be_visible(timeout=10000)
-    first_product.click()
+    page.locator("[data-test='username']").fill("standard_user")
+    page.locator("[data-test='password']").fill("secret_sauce")
+    page.locator("[data-test='login-button']").click()
+    
+    # Add first product to cart
+    add_btn = page.locator("[data-test='add-to-cart-sauce-labs-backpack']")
+    expect(add_btn).to_be_visible(timeout=10000)
+    add_btn.click()
+    
+    # Assert cart quantity is updated to 1
+    cart_badge = page.locator(".shopping_cart_badge")
+    expect(cart_badge).to_have_text("1")
 
-    add_to_cart_btn = page.locator("[data-test='add-to-cart']")
-    expect(add_to_cart_btn).to_be_visible(timeout=10000)
-    add_to_cart_btn.click()
-
-    # Verify toast or cart counter
-    expect(page.locator("[data-test='cart-quantity']")).to_have_text("1", timeout=10000)
-
+# 4. Validate Error on Invalid Login
 def test_invalid_login_validation(page: Page):
-    page.goto(f"{BASE_URL}/auth/login", wait_until="networkidle", timeout=60000)
+    page.goto(BASE_URL, wait_until="domcontentloaded", timeout=30000)
     
-    page.locator("[data-test='email']").fill("invalid_user@mail.com")
-    page.locator("[data-test='password']").fill("wrongpassword123")
-    page.locator("[data-test='login-submit']").click()
-
-    error_message = page.locator("[data-test='login-error']")
-    expect(error_message).to_be_visible(timeout=10000)
+    page.locator("[data-test='username']").fill("locked_out_user")
+    page.locator("[data-test='password']").fill("wrong_password")
+    page.locator("[data-test='login-button']").click()
+    
+    # Assert error banner appears
+    error_container = page.locator("[data-test='error']")
+    expect(error_container).to_be_visible(timeout=10000)
+    expect(error_container).to_contain_text("Username and password do not match")

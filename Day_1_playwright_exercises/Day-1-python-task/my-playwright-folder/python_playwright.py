@@ -14,7 +14,7 @@ def test_homepage_title_and_banner(page: Page):
     expect(navbar_brand).to_be_visible()
 
 def test_search_and_filter_product(page: Page):
-    """Search for a specific tool and assert search results."""
+
     page.goto(BASE_URL)
 
     search_input = page.locator("[data-test='search-query']")

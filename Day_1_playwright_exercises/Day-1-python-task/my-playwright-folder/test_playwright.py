@@ -49,7 +49,7 @@ def test_add_tool_to_cart(page: Page):
     # Click Add to Cart
     add_to_cart_btn.click()
 
-    # Verify toast notification alert appears
+
     toast_alert = page.locator(".toast-body")
     expect(toast_alert).to_be_visible()
     expect(toast_alert).to_contain_text("Product added to shopping cart")
